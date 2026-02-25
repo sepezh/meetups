@@ -22,18 +22,20 @@ export default function MeetupDetails(props) {
 }
 
 export async function getStaticPaths() {
-  const client = await MongoClient.connect('mongodb+srv://sepezh:WuNL0sfcutWjhX@cluster0.gi6csrm.mongodb.net/meetups=Cluster0')
-  const db = client.db()
+  const client = await MongoClient.connect(process.env.MONGODB_URI);
+  const db = client.db();
 
-  const meetupsCollection = db.collection('meetups');
+  const meetupsCollection = db.collection("meetups");
 
   const meetups = await meetupsCollection.find({}, { _id: 1 }).toArray();
 
-  client.close()
+  client.close();
 
   return {
     fallback: "blocking",
-    paths: meetups.map((meetup) => ({ params: { meetupId: meetup._id.toString() } }))
+    paths: meetups.map((meetup) => ({
+      params: { meetupId: meetup._id.toString() },
+    })),
   };
 }
 
@@ -42,12 +44,14 @@ export async function getStaticProps(context) {
 
   const meetupId = context.params.meetupId;
 
-  const client = await MongoClient.connect('mongodb+srv://sepezh:WuNL0sfcutWjhX@cluster0.gi6csrm.mongodb.net/meetups=Cluster0')
-  const db = client.db()
+  const client = await MongoClient.connect(process.env.MONGODB_URI);
+  const db = client.db();
 
-  const meetupsCollection = db.collection('meetups');
+  const meetupsCollection = db.collection("meetups");
 
-  const selectedMeetup = await meetupsCollection.findOne({ _id: new ObjectId(meetupId) })
+  const selectedMeetup = await meetupsCollection.findOne({
+    _id: new ObjectId(meetupId),
+  });
 
   return {
     props: {
@@ -57,7 +61,7 @@ export async function getStaticProps(context) {
         address: selectedMeetup.data.address,
         image: selectedMeetup.data.image,
         description: selectedMeetup.data.description, //we avoid description because we are not outputting description in this component
-      }
+      },
     },
   };
 }
